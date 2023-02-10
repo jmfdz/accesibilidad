@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- https://mathjax.github.io/MathJax-demos-web/ -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>MathJax Convertir TeX a MathML</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+
+  <style>
+
+  #output > pre {
+    margin: 0;
+  }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+<main>
+  <h1 class="mt-4">MathJax Convertir TeX a MathML</h1>
+  <div class="row">
+    <div class="col-md-6">
+      <label for="input">Escribe TeX</label>
+<textarea id="input" rows="10" cols="30" CLASS="form-control">
+%
+% Escribe tus comandos TeX abajo
+%
+x = {-b \pm \sqrt{b^2-4ac} \over 2a}.
+</textarea>
+      <div>
+        <input type="checkbox" id="display" checked onchange="convert()"> <label for="display">Display style</label>
+        <input type="button" value="Convertir" id="render" />
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h2>MathML interactivo</h2>
+      <div id="mathmlresult" class="pt-5 pb-5"></div>
+
+      <h2 class="mt-5">Ver código MathML</h2>
+      <div>
+        <textarea id="output" class="form-control" rows="10"></textarea>
+      </div>
+
+
+    </div>
+  </div>
+</main>
+</div>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script>
+  MathJax = {
+    loader: {load: ['input/tex']}
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/startup.js"></script>
+<script>
+  function convert() {
+    //
+    //  Get the TeX input
+    //
+    let input = document.getElementById("input").value.trim();
+    //
+    //  Disable the display and render buttons until MathJax is done
+    //
+    let display = document.getElementById("display");
+    let button = document.getElementById("render");
+    button.disabled = display.disabled = true;
+    //
+    //  Clear the old output
+    //
+    let output = document.getElementById('output');
+    //
+    //  Reset the tex labels (and automatic equation numbers, though there aren't any here).
+    //  Convert the input to MathML output and use a promise to wait for it to be ready
+    //    (in case an extension needs to be loaded dynamically).
+    //
+    MathJax.texReset();
+    MathJax.tex2mmlPromise(input, {display: display.checked}).then(function (mml) {
+      //
+      //  The promise returns the serialized MathML, and we add that
+      //  to the <pre> element in the output.
+      //
+      output.value = mml
+      document.getElementById("mathmlresult").innerHTML = mml
+    }).catch(function (err) {
+      //
+      //  If there was an error, put the message into the output instead
+      //
+      output.firstChild.appendChild(document.createTextNode(err.message));
+    }).then(function () {
+      //
+      //  Error or not, re-enable the display and render buttons
+      //
+      button.disabled = display.disabled = false;
+    });
+  }
+</script>
+<!-- Bootstrap 5 JS Bundle (incluye popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script>
+  document.getElementById("render").addEventListener("click", function(event){
+    convert()
+  })
+</script>
+</body>
+</html>
