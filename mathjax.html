@@ -29,13 +29,13 @@
     <div class="col-md-6">
       <label for="input">Escribe TeX</label>
 <textarea id="input" rows="10" cols="30" CLASS="form-control">
-%
-% Escribe tus comandos TeX abajo
-%
+% Las ecuaciones de la forma:
+ax^2 + bx + c = 0
+
+% tienen por solución:
 x = {-b \pm \sqrt{b^2-4ac} \over 2a}.
 </textarea>
       <div>
-        <input type="checkbox" id="display" checked onchange="convert()"> <label for="display">Display style</label>
         <input type="button" value="Convertir" id="render" />
       </div>
     </div>
@@ -102,12 +102,44 @@ x = {-b \pm \sqrt{b^2-4ac} \over 2a}.
       button.disabled = display.disabled = false;
     });
   }
+
+  function convertir(tex, i) {
+      let output = document.getElementById('output');
+      MathJax.texReset();
+      MathJax.tex2mmlPromise(tex, {display: true}).then(function (mml) {
+          output.value = mml
+          document.getElementById("eq"+i).innerHTML = mml
+      }).catch(function (err) {
+          //
+          //  If there was an error, put the message into the output instead
+          //
+          output.firstChild.appendChild(document.createTextNode(err.message));
+      }).then(function () {
+          //
+          //  Error or not, re-enable the display and render buttons
+          //
+          button.disabled = display.disabled = false;
+      });
+  }
 </script>
 <!-- Bootstrap 5 JS Bundle (incluye popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script>
   document.getElementById("render").addEventListener("click", function(event){
-    convert()
+      let mathmlresult = document.getElementById("mathmlresult")
+      mathmlresult.innerHTML = ""
+      let lineas = document.getElementById("input").value.trim().split("\n")
+      let resultados = []
+      lineas.forEach( (linea, i) => {
+          let div = document.createElement("div")
+          div.id = "eq" + i
+          if(linea.startsWith("%")) {
+              div.innerHTML = "<p>" + linea.replaceAll("%","").trim() + "</p>"
+          } else {
+              convertir(linea, i)
+          }
+          mathmlresult.appendChild(div)
+      })
   })
 </script>
 </body>
