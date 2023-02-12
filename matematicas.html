@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/html">
+<head>
+    <!-- https://mathjax.github.io/MathJax-demos-web/ -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Convertir TeX/LaTeX a MathML</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+    <style>
+        body {
+            font-family: Arial;
+            font-size: 1.3rem;
+        }
+        #mathmlresult > div {
+            margin:1.5rem 0;
+        }
+        #mathmlresult math {
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <header class="mt-4 mb-4">
+        <h1>Convertir TeX/LaTeX a MathML</h1>
+    </header>
+    <main>
+        <div class="row">
+            <div class="col-md-6">
+                <form>
+                    <fieldset>
+                        <legend class="mb-3">Escribe ecuaciones matemáticas en Tex/LaTeX y obtén el resultado en formato MathML</legend>
+
+                        <div class="mb-3">
+                            <label for="input" class="form-label">Escribe TeX/LaTeX</label>
+                            <textarea id="input" rows="10" cols="30" class="form-control">
+% Las ecuaciones de la forma:
+ax^2 + bx + c = 0
+
+% tienen por solución:
+x = {-b \pm \sqrt{b^2-4ac} \over 2a}.
+</textarea>
+                        </div>
+                        <div>
+                            <button type="button" id="render" class="btn btn-lg btn-primary" >Convertir</button>
+                        </div>
+                        <div id="errores"></div>
+                    </fieldset>
+                </form>
+                <!--
+                <div class="mt-5">
+                    <h2>Generar HTML</h2>
+                    <p>Una vez generado el contenido en formato MathML puedes descargarlo en un único fichero HTML.</p>
+                    <p><a href="#" id="descargar" download="mathml.html" class="btn btn-secondary">Descargar</a></p>
+                    </p>
+                </div>
+                -->
+            </div>
+            <div class="col-md-6">
+                <h2>MathML</h2>
+                <div class="card mt-4 mb-4">
+                    <div class="card-body">
+                        <div id="mathmlresult">
+                            <div id="eq0"><p>Las ecuaciones de la forma:</p></div>
+                            <div id="eq1"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                                <mi>a</mi>
+                                <msup>
+                                    <mi>x</mi>
+                                    <mn>2</mn>
+                                </msup>
+                                <mo>+</mo>
+                                <mi>b</mi>
+                                <mi>x</mi>
+                                <mo>+</mo>
+                                <mi>c</mi>
+                                <mo>=</mo>
+                                <mn>0</mn>
+                            </math></div>
+                            <div id="eq2"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"></math></div>
+                            <div id="eq3"><p>tienen por solución:</p></div>
+                            <div id="eq4"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                                <mi>x</mi>
+                                <mo>=</mo>
+                                <mrow data-mjx-texclass="ORD">
+                                    <mfrac>
+                                        <mrow>
+                                            <mo>−</mo>
+                                            <mi>b</mi>
+                                            <mo>±</mo>
+                                            <msqrt>
+                                                <msup>
+                                                    <mi>b</mi>
+                                                    <mn>2</mn>
+                                                </msup>
+                                                <mo>−</mo>
+                                                <mn>4</mn>
+                                                <mi>a</mi>
+                                                <mi>c</mi>
+                                            </msqrt>
+                                        </mrow>
+                                        <mrow>
+                                            <mn>2</mn>
+                                            <mi>a</mi>
+                                        </mrow>
+                                    </mfrac>
+                                </mrow>
+                                <mo>.</mo>
+                            </math></div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </main>
+</div>
+
+<!-- Bootstrap 5 JS Bundle (incluye popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script>
+    MathJax = {
+        loader: {load: ['input/tex']}
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/startup.js"></script>
+<script>
+    const Mamematicas = {
+        convertir(tex, i) {
+            MathJax.texReset();
+            MathJax.tex2mmlPromise(tex, {display: true}).then(function (mml) {
+                document.getElementById("eq" + i).innerHTML = mml
+            }).catch(function (err) {
+                document.getElementById("errores").innerHTML = "Error: " + err.message
+            }).then(function () {
+                //  Error or not, re-enable the display and render buttons
+                button.disabled = display.disabled = false;
+            });
+        }
+    }
+
+    document.getElementById("render").addEventListener("click", function(event){
+        let mathmlresult = document.getElementById("mathmlresult")
+        mathmlresult.innerHTML = ""
+        const lineas = document.getElementById("input").value.trim().split("\n")
+
+        lineas.forEach( (linea, i) => {
+            let div = document.createElement("div")
+            div.id = "eq" + i
+            if(linea.startsWith("%")) {
+                div.innerHTML = "<p>" + linea.replaceAll("%","").trim() + "</p>"
+            } else {
+                Mamematicas.convertir(linea, i)
+            }
+            mathmlresult.appendChild(div)
+        })
+    })
+
+    document.getElementById("descargar").addEventListener("click", function(event){
+
+    })
+</script>
+</body>
+</html>
